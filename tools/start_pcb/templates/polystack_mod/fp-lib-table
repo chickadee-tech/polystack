@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name hirose-df40)(type KiCad)(uri "$(KIPRJMOD)/../../kicad-libs/footprints/hirose-df40.pretty")(options "")(descr ""))
+)

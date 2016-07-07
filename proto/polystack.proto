@@ -1,0 +1,197 @@
+// MIT License
+//
+// Copyright (c) 2016 Chickadee Tech LLC
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+message ModInfo {
+  // Official enumeration of all FlightStack manufacturers. Create a pull
+  // request to claim your own. Until officially merged do not release any
+  // products! For testing prior to release use MANUFACTURER_TEST and a random
+  // product ID to minimize the likelihood of collisions.
+  enum Manufacturer {
+    MANUFACTURER_TEST = 0;
+    MANUFACTURER_CHICKADEE_TECH = 1;
+  }
+  optional Manufacturer manufacturer_id = 1;
+
+  // Name of the manufacturer. Limited to 64 characters.
+  optional string manufacturer_name = 2;
+
+  // URL to the manufacturer's homepage. Limited to 256 characters. No need to
+  // include protocol.
+  optional string manufacturer_url = 3;
+
+  // Numeric id of mod. Numbers are assigned at the manufacturer's
+  // discretion.
+  optional uint32 mod_id = 4;
+
+  // Name of the mod. Limited to 64 characters.
+  optional string mod_name = 5;
+
+  // Version of the mod. Also up to the manufacturer.
+  optional uint32 mod_version = 6;
+
+  // URL to more information about the mod. Limited to 256 characters.
+  optional string mod_url = 7;
+
+  // Version of the connector layout. Almost always 3.
+  // Versions 1 and 2 were used in prototyping only.
+  optional uint32 connector_version = 8;
+
+  // Stacking height of the FlightStack connector.
+  enum DF40StackingHeight {
+    HEIGHT_4MM = 0;
+    HEIGHT_3_5MM = 1;
+    HEIGHT_3MM = 2;
+    // DF40 80-pins don't come in 2.5mm.
+    HEIGHT_2MM = 3;
+    HEIGHT_1_5MM = 4;
+  }
+  optional DF40StackingHeight stacking_height = 9;
+
+  // Total stacking height in millimeters excluding the DF40 header on the
+  // bottom of the board.
+  optional float total_height = 10;
+}
+
+// This catalogs manufacturing related info that can be
+// used to diagnose manufacturing issues.
+message ManufacturingInfo {
+  // 96-bit id, MSB. Added by the test fixture.
+  repeated fixed32 test_device_id = 1;
+
+  // Time of the latest test. Added by the test fixture.
+  optional fixed64 test_time = 2;
+}
+
+message SingleTimerConfig {
+  enum TimerInputFunction {
+    INPUT_UNUSED = 0;
+    PPM = 1;
+  }
+
+  enum TimerOutputFunction {
+    OUTPUT_UNUSED = 0;
+    LED    = 1;
+    SERVO  = 2;
+  }
+
+  oneof function {
+    TimerInputFunction input = 1;
+    TimerOutputFunction output = 2;
+  }
+}
+
+message GPIOConfig {
+  enum GPIOFunction {
+    UNUSED = 0;
+    REMOTE_CONTROL_INVERT = 1;
+    SWD_SCL = 2;
+    SWD_SDIO = 3;
+    BUZZER = 4;
+    SD_CARD_DETECT = 5;
+    ACTIVITY_LED_ACTIVE_LOW = 6;
+  }
+  optional GPIOFunction function = 1;
+}
+
+message i2cConfig {
+  optional uint32 address = 1;
+  optional bool address_uses_height = 2;
+}
+
+message PowerConfig {
+  optional uint32 average_current_ma = 1;
+  optional uint32 maximum_current_ma = 2;
+
+  optional bool current_unknown = 5;
+
+  optional bool uses_3v3_ll_for_logic_level_shifting = 3;
+  optional bool reads_batt_div = 4;
+}
+
+message SerialConfig {
+  enum SerialFunction {
+    USER_CONFIGURED = 0;
+    REMOTE_CONTROL = 1;
+    TELEMETRY = 2;
+    MULTIWII_SERIAL_PROTOCOL = 3;
+  }
+  optional SerialFunction function = 1;
+
+  enum RemoteControlProtocol {
+    REMOTE_CONTROL_USER_CONFIGURED = 0;
+    SBUS = 1;
+  }
+  optional RemoteControlProtocol remote_control_protocol = 2;
+
+  enum TelemetryProtocol {
+    TELEMETRY_USER_CONFIGURED = 0;
+    SMARTPORT = 1;
+    FRSKY = 2;
+  }
+  optional TelemetryProtocol telemetry_protocol = 3;
+}
+
+message TimerGroupConfig {
+  enum TimerGroupFunction {
+    USER_CONFIGURED = 0;
+    PWM_INPUT = 1;
+  }
+  optional TimerGroupFunction function = 1;
+}
+
+message ADCConfig {
+
+}
+
+message MCUControlConfig {
+  optional bool controls_boot_pin = 1;
+  optional bool controls_reset_pin = 2;
+}
+
+message SPIConfig {
+  enum SPIFunction {
+    SPI_USER_CONFIGURED = 0;
+    SDCARD = 1;
+  }
+  optional SPIFunction function = 1;
+}
+
+message PolystackMod {
+  // Use 1 unless things change. Most protocol buffering should happen through
+  // additional fields but this is a sanity check. As a rule, NEVER change the
+  // meaning of a field and leave the field number the same. Always add a new
+  // field instead.
+  optional uint32 proto_version = 1;
+  optional ModInfo mod_info = 2;
+
+  optional ManufacturingInfo manufacturing_info = 3;
+
+  repeated SingleTimerConfig single_timer_config = 4;
+  repeated GPIOConfig gpio_config = 5;
+  repeated i2cConfig i2c_config = 6;
+  repeated PowerConfig power_config = 7;
+  repeated SerialConfig serial_config = 8;
+  repeated TimerGroupConfig timer_group_config = 9;
+  repeated ADCConfig adc_config = 10;
+  optional MCUControlConfig mcu_control_config = 11;
+  repeated SPIConfig spi_config = 12;
+}
